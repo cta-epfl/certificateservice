@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "certificateservice"
+version = "0.1.0"
+description = ""
+authors = ["Bastien Wermeille <bastien.wermeille@proton.me>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.31.0"
+sentry-sdk = {extras = ["flask"], version = "^1.30.0"}
+importlib-metadata = "^6.8.0"
+pyopenssl = "^23.2.0"
+flask-cors = "^4.0.0"
+
+[tool.poetry.group.jupyterhub.dependencies]
+jupyterhub = "^4.0.1"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+ctadata = { git = "https://github.com/cta-epfl/ctadata.git", tag = "v0.3.0-beta1" }
+pytest = "^7.3.2"
+psutil = "^5.9.5"
+pytest-flask = "^1.2.0"
+pytest-timeout = "^2.1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+certficateservice = { callable = "certficateservice.cli:main" }
