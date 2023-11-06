@@ -181,6 +181,9 @@ def user_to_path_fragment(user):
 @app.route(url_prefix + '/certificate', methods=['GET'])
 @authenticated
 def get_certificate(user=None):
+    cert = app.config['CTADS_CLIENTCERT']
+    own_certificate = False
+
     if user is not None:
         filename = user_to_path_fragment(user) + ".crt"
         own_certificate_file = os.path.join(
@@ -189,6 +192,10 @@ def get_certificate(user=None):
         if os.path.isfile(own_certificate_file):
             own_certificate = True
             cert = own_certificate_file
+
+    allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
+    if not user_to_path_fragment(user) in allowed_users:
+        raise "You do not have any certificate configured"
 
     try:
         with open(cert, 'r') as f:
@@ -200,14 +207,13 @@ def get_certificate(user=None):
                 else:
                     logger.exception('outdated main certificate')
                     raise 'Service certificate invalid please contact us.'
-
-            session.verify = app.config['CTADS_CABUNDLE']
-            session.cert = cert
+        
+            return {
+                'certificate': certificate,
+                'cabundle': open(app.config['CTADS_CABUNDLE'], 'r').read()
+            }, 200
     except FileNotFoundError:
-        return 
-        raise CertificateError('no valid certificate configured')
-
-    # TODO: Return certificate
+        raise 'no valid certificate configured'
 
 
 @app.route(url_prefix + '/certificate', methods=['POST'])
