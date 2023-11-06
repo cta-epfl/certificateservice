@@ -72,7 +72,7 @@ def sign_certificate(ca, duration):
         return certificate
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def app():
     with tempfile.TemporaryDirectory() as tmpdir:
         from certificateservice.app import app
@@ -85,11 +85,12 @@ def app():
 
             app.config.update({
                 "TESTING": True,
-                "CTADS_DISABLE_ALL_AUTH": True,
+                "CTACS_DISABLE_ALL_AUTH": True,
+                "CTACS_MAIN_CERT_ALLOWED_USER": 'anonymous',
                 "DEBUG": True,
-                "CTADS_CABUNDLE": ca['crt_file'],
-                "CTADS_CLIENTCERT": client_cert_file,
-                "CTADS_CLIENTCERT_DIR": tmpdir,
+                "CTACS_CABUNDLE": ca['crt_file'],
+                "CTACS_CLIENTCERT": client_cert_file,
+                "CTACS_CERTIFICATE_DIR": tmpdir,
                 "SERVER_NAME": 'app',
             })
 

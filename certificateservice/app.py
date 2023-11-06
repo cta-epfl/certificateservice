@@ -13,8 +13,8 @@ import secrets
 import xml.etree.ElementTree as ET
 import importlib.metadata
 from flask import (
-    Blueprint, Flask, Response, jsonify, make_response, redirect, request,
-    session, stream_with_context, render_template
+    Blueprint, Flask, make_response, redirect, request,
+    session, render_template
 )
 from flask_cors import CORS
 
@@ -76,21 +76,21 @@ def create_app():
         'FLASK_SECRET', secrets.token_bytes(32))
     app.secret_key = app.config['SECRET_KEY']
 
-    app.config['CTADS_CERTIFICATE_DIR'] = \
-        os.environ.get('CTADS_CERTIFICATE_DIR', './certificate/')
-    app.config['CTADS_CABUNDLE'] = \
-        os.environ.get('CTADS_CABUNDLE', '/etc/cabundle.pem')
-    app.config['CTADS_CLIENTCERT'] = \
-        os.environ.get('CTADS_CLIENTCERT', '/tmp/x509up_u1000')
-    app.config['CTADS_DISABLE_ALL_AUTH'] = \
-        os.getenv('CTADS_DISABLE_ALL_AUTH', 'False') == 'True'
+    app.config['CTACS_CERTIFICATE_DIR'] = \
+        os.environ.get('CTACS_CERTIFICATE_DIR', './certificate/')
+    app.config['CTACS_CABUNDLE'] = \
+        os.environ.get('CTACS_CABUNDLE', '/etc/cabundle.pem')
+    app.config['CTACS_CLIENTCERT'] = \
+        os.environ.get('CTACS_CLIENTCERT', '/tmp/x509up_u1000')
+    app.config['CTACS_DISABLE_ALL_AUTH'] = \
+        os.getenv('CTACS_DISABLE_ALL_AUTH', 'False') == 'True'
 
     # Check certificate folder
-    os.makedirs(app.config['CTADS_CERTIFICATE_DIR'], exist_ok=True)
+    os.makedirs(app.config['CTACS_CERTIFICATE_DIR'], exist_ok=True)
 
     # Check certificates and their validity on startup
-    cabundle_file = app.config['CTADS_CABUNDLE']
-    cert_file = app.config['CTADS_CLIENTCERT']
+    cabundle_file = app.config['CTACS_CABUNDLE']
+    cert_file = app.config['CTACS_CLIENTCERT']
     try:
         cabundle = open(cabundle_file, 'r').read()
         with open(cert_file, 'r') as f:
@@ -122,7 +122,7 @@ def authenticated(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
-        if app.config['CTADS_DISABLE_ALL_AUTH']:
+        if app.config['CTACS_DISABLE_ALL_AUTH']:
             return f({'name': 'anonymous', 'admin': True}, *args, **kwargs)
         else:
             if auth is None:
@@ -181,13 +181,13 @@ def user_to_path_fragment(user):
 @app.route(url_prefix + '/certificate', methods=['GET'])
 @authenticated
 def get_certificate(user=None):
-    cert = app.config['CTADS_CLIENTCERT']
+    cert = app.config['CTACS_CLIENTCERT']
     own_certificate = False
 
     if user is not None:
         filename = user_to_path_fragment(user) + ".crt"
         own_certificate_file = os.path.join(
-            app.config['CTADS_CERTIFICATE_DIR'], filename)
+            app.config['CTACS_CERTIFICATE_DIR'], filename)
 
         if os.path.isfile(own_certificate_file):
             own_certificate = True
@@ -210,7 +210,7 @@ def get_certificate(user=None):
         
             return {
                 'certificate': certificate,
-                'cabundle': open(app.config['CTADS_CABUNDLE'], 'r').read()
+                'cabundle': open(app.config['CTACS_CABUNDLE'], 'r').read()
             }, 200
     except FileNotFoundError:
         raise 'no valid certificate configured'
@@ -221,12 +221,12 @@ def get_certificate(user=None):
 def upload_certificate(user):
     filename = user_to_path_fragment(user) + ".crt"
     certificate_file = os.path.join(
-        app.config['CTADS_CERTIFICATE_DIR'], filename)
+        app.config['CTACS_CERTIFICATE_DIR'], filename)
 
     certificate = request.json.get('certificate')
 
     try:
-        cabundle = open(app.config['CTADS_CABUNDLE'], 'r').read()
+        cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
     except FileNotFoundError:
         return 'certificateservice cabundle not configured, ' + \
             'please contact the administrator', 500
@@ -261,9 +261,9 @@ def upload_main_certificate(user):
         return 'requests missing certificate or cabundle', 400
 
     if cabundle is None:
-        cabundle = open(app.config['CTADS_CABUNDLE'], 'r').read()
+        cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
     if certificate is None:
-        certificate = open(app.config['CTADS_CLIENTCERT'], 'r').read()
+        certificate = open(app.config['CTACS_CLIENTCERT'], 'r').read()
     verify_certificate(cabundle, certificate)
 
     if certificate and certificate_validity(certificate).date() > \
@@ -274,15 +274,15 @@ def upload_main_certificate(user):
 
     updated = set()
     if certificate is not None:
-        with open(app.config['CTADS_CLIENTCERT'], 'w') as f:
+        with open(app.config['CTACS_CLIENTCERT'], 'w') as f:
             f.write(certificate)
             updated.add('Certificate')
-        os.chmod(app.config['CTADS_CLIENTCERT'], stat.S_IWUSR) # Write by owner
+        os.chmod(app.config['CTACS_CLIENTCERT'], stat.S_IWUSR) # Write by owner
     if cabundle is not None:
-        with open(app.config['CTADS_CABUNDLE'], 'w') as f:
+        with open(app.config['CTACS_CABUNDLE'], 'w') as f:
             f.write(cabundle)
             updated.add('CABundle')
-        os.chmod(app.config['CTADS_CABUNDLE'], stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH) 
+        os.chmod(app.config['CTACS_CABUNDLE'], stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH) 
 
     return {
         'message': ' and '.join(updated) + ' stored',

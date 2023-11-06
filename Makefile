@@ -1,8 +1,8 @@
 
 listen:
 	FLASK_SECRET=$(shell cat secret-env.sh) \
-	CTADS_CLIENTCERT=/tmp/x509up_u1000 \
-	CTADS_CABUNDLE=/home/savchenk/cabundle.pem \
+	CTACS_CLIENTCERT=/tmp/x509up_u1000 \
+	CTACS_CABUNDLE=/home/savchenk/cabundle.pem \
 	FLASK_APP=certificateservice \
 		     flask run --debug
 
