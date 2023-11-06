@@ -1,6 +1,6 @@
-# Download service
+# Certificate service
 
-Backend server for [https://github.com/cta-epfl/ctadata](https://github.com/cta-epfl/ctadata).
+Partial backend server for [https://github.com/cta-epfl/ctadata](https://github.com/cta-epfl/ctadata).
 
 ## Installation
 
