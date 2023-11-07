@@ -30,4 +30,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-certficateservice = { callable = "certficateservice.cli:main" }
+certificateservice = { callable = "certificateservice.cli:main" }
