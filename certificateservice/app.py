@@ -134,8 +134,8 @@ def download_authenticated(f):
             else:
                 header_token = None
 
-            service_token = session.get('service_token') \
-                or request.args.get('service_token') \
+            service_token = session.get('service-token') \
+                or request.args.get('service-token') \
                 or header_token
 
             if service_token:
