@@ -115,7 +115,61 @@ def handle_bad_request(e):
     return e.message, 400
 
 
-def authenticated(f):
+def download_authenticated(f):
+    """Decorator for authenticating with the Hub via OAuth"""
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if app.config['CTACS_DISABLE_ALL_AUTH']:
+            return f({'name': 'anonymous', 'admin': True}, *args, **kwargs)
+        else:
+            if auth is None:
+                return 'Unable to use jupyterhub to verify access to this\
+                    service. At this time, the certificateservice uses jupyterhub\
+                    to control access to protected resources', 500
+
+            header = request.headers.get('Authorization')
+            if header and header.startswith('Bearer '):
+                header_token = header.removeprefix('Bearer ')
+            else:
+                header_token = None
+
+            service_token = session.get('service_token') \
+                or request.args.get('service_token') \
+                or header_token
+
+            if service_token:
+                service = auth.user_for_token(service_token)
+                if service is not None and not auth.check_scopes(
+                        'custom:certificateservice:download', service):
+                    return 'Access denied, token scopes are insufficient. ' + \
+                        'If you need access to this service, please ' + \
+                        'contact CTA-CH DC team at EPFL.', 403
+            else:
+                user = None
+
+            # Get user token
+            user_token = request.args.get('user-token')
+
+            if user_token:
+                user = auth.user_for_token(user_token)
+                if user is not None and not auth.check_scopes(
+                        'access:services!service=certificateservice', user):
+                    return 'Access denied, token scopes are insufficient. ' + \
+                        'If you need access to this service, please ' + \
+                        'contact CTA-CH DC team at EPFL.', 403
+            else:
+                user = None
+
+            if user:
+                return f(user, *args, **kwargs)
+            else:
+                return "invalid user permissions for certificate service", 500
+
+    return decorated
+
+
+def upload_authenticated(f):
     # TODO: here do a permission check;
     # in the future, the check will be done with rucio maybe
     """Decorator for authenticating with the Hub via OAuth"""
@@ -165,7 +219,7 @@ def authenticated(f):
 
 
 @app.route(url_prefix + '/')
-@authenticated
+@upload_authenticated
 def login(user):
     token = session.get('token') or request.args.get('token')
     return render_template('index.html', user=user, token=token)
@@ -179,7 +233,7 @@ def user_to_path_fragment(user):
 
 
 @app.route(url_prefix + '/certificate', methods=['GET'])
-@authenticated
+@download_authenticated
 def get_certificate(user=None):
     cert = app.config['CTACS_CLIENTCERT']
     own_certificate = False
@@ -217,7 +271,7 @@ def get_certificate(user=None):
 
 
 @app.route(url_prefix + '/certificate', methods=['POST'])
-@authenticated
+@upload_authenticated
 def upload_certificate(user):
     filename = user_to_path_fragment(user) + ".crt"
     certificate_file = os.path.join(
@@ -248,7 +302,7 @@ def upload_certificate(user):
 
 
 @app.route(url_prefix + '/main-certificate', methods=['POST'])
-@authenticated
+@upload_authenticated
 def upload_main_certificate(user):
     if not isinstance(user, dict) or user['admin'] is not True:
         return 'access denied', 401
