@@ -7,12 +7,8 @@ from certificateservice.certificate import (
 from functools import wraps
 import os
 import stat
-import io
 import re
-from urllib.parse import urlparse
-import requests
 import secrets
-import xml.etree.ElementTree as ET
 import importlib.metadata
 from flask import (
     Blueprint,
