@@ -73,16 +73,16 @@ def test_get_cert_config(app: Any, client: Any):
     )
     r = client.get(url_for('get_certificate'))
     assert r.status_code == 200 and \
-            r.json['certificate'] == certificate and \
-            r.json['cabundle'] == open(app.config['CTACS_CABUNDLE'], 'r').read()
+        r.json['certificate'] == certificate and \
+        r.json['cabundle'] == open(app.config['CTACS_CABUNDLE'], 'r').read()
 
 
 @pytest.mark.timeout(30)
 def test_get_cert_main_config(app: Any, client: Any):
     r = client.get(url_for('get_certificate'))
-    assert r.status_code == 200 and \
-            r.json['certificate'] == open(app.config['CTACS_CLIENTCERT'], 'r').read() and \
-            r.json['cabundle'] == open(app.config['CTACS_CABUNDLE'], 'r').read()
+    assert r.status_code == 200 and r.json['certificate'] == 
+        open(app.config['CTACS_CLIENTCERT'], 'r') and
+        r.json['cabundle'] == open(app.config['CTACS_CABUNDLE'], 'r').read()
 
 
 @pytest.mark.timeout(30)
