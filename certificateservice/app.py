@@ -290,7 +290,7 @@ def get_certificate(user=None):
             certificate = f.read()
             if certificate_validity(certificate) <= datetime.now():
                 if own_certificate:
-                    raise 'Your configured certificate is invalid, ' +
+                    raise 'Your configured certificate is invalid, ' +\
                         'please refresh it.'
                 else:
                     logger.exception('outdated main certificate')

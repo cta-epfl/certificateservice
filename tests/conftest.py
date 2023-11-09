@@ -97,4 +97,3 @@ def app():
             app.ca = ca
 
             yield app
-
