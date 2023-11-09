@@ -6,7 +6,6 @@ authors = ["Bastien Wermeille <bastien.wermeille@proton.me>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-requests = "^2.31.0"
 sentry-sdk = {extras = ["flask"], version = "^1.30.0"}
 importlib-metadata = "^6.8.0"
 pyopenssl = "^23.2.0"

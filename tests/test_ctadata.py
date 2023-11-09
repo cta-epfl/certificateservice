@@ -5,12 +5,12 @@ import ctadata
 
 
 @pytest.mark.timeout(30)
-def test_apiclient_upload_certificate(testing_download_service):
-    ctadata.APIClient.downloadservice = testing_download_service['url']
+def test_apiclient_upload_certificate(testing_certificate_service):
+    ctadata.APIClient.downloadservice = testing_certificate_service['url']
 
     with tempfile.TemporaryDirectory() as tmpdir:
         cert_file = f"{tmpdir}/cert-file"
-        certificate = sign_certificate(testing_download_service['ca'], 1)
+        certificate = sign_certificate(testing_certificate_service['ca'], 1)
         open(cert_file, 'w').write(certificate)
         res = ctadata.upload_certificate(cert_file)
         assert (
@@ -21,8 +21,8 @@ def test_apiclient_upload_certificate(testing_download_service):
 
 
 @pytest.mark.timeout(30)
-def test_apiclient_upload_admin_cert(testing_download_service):
-    ctadata.APIClient.downloadservice = testing_download_service['url']
+def test_apiclient_upload_admin_cert(testing_certificate_service):
+    ctadata.APIClient.downloadservice = testing_certificate_service['url']
 
     with ca_certificate() as alt_ca:
         with tempfile.TemporaryDirectory() as tmpdir:
