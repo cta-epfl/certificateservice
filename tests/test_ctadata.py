@@ -1,4 +1,4 @@
-from conftest import upstream_webdav_server, ca_certificate, sign_certificate
+from conftest import ca_certificate, sign_certificate
 import tempfile
 import pytest
 import ctadata
