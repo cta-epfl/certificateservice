@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import copy
 import hashlib
 import os
+import psutil
 import pytest
 import re
 import signal
