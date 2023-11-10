@@ -137,8 +137,8 @@ def download_authenticated(f):
             if auth is None:
                 return (
                     'Unable to use jupyterhub to verify access to this\
-                    service. At this time, the certificateservice uses jupyterhub\
-                    to control access to protected resources',
+                    service. At this time, the certificateservice uses\
+                    jupyterhub to control access to protected resources',
                     500,
                 )
 
@@ -206,8 +206,8 @@ def upload_authenticated(f):
             if auth is None:
                 return (
                     'Unable to use jupyterhub to verify access to this\
-                    service. At this time, the certificateservice uses jupyterhub\
-                    to control access to protected resources',
+                    service. At this time, the certificateservice uses\
+                    jupyterhub to control access to protected resources',
                     500,
                 )
 
