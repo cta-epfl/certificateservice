@@ -12,7 +12,7 @@ def test_apiclient_upload_certificate(testing_certificate_service):
         cert_file = f"{tmpdir}/cert-file"
         certificate = sign_certificate(testing_certificate_service['ca'], 1)
         open(cert_file, 'w').write(certificate)
-        res = ctadata.upload_certificate(cert_file)
+        res = ctadata.upload_personal_certificate(cert_file)
         assert (
             type(res) is dict
             and res['message'] is not None
