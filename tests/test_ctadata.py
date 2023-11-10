@@ -29,7 +29,7 @@ def test_apiclient_upload_admin_cert(testing_certificate_service):
             cert_file = f"{tmpdir}/cert-file"
             certificate = sign_certificate(alt_ca, 1)
             open(cert_file, 'w').write(certificate)
-            res = ctadata.upload_admin_certificate(
+            res = ctadata.upload_shared_certificate(
                 certificate_file=cert_file,
                 cabundle_file=alt_ca['crt_file'],
             )
