@@ -337,7 +337,7 @@ def upload_certificate(user):
 
     with open(certificate_file, 'w') as f:
         f.write(certificate)
-    os.chmod(certificate_file, stat.S_IWUSR)
+    os.chmod(certificate_file, stat.S_IWUSR | stat.S_IRUSR)
 
     return {'message': 'Certificate stored', 'validity': validity}, 200
 
@@ -377,7 +377,7 @@ def upload_main_certificate(user):
             f.write(certificate)
             updated.add('Certificate')
         os.chmod(
-            app.config['CTACS_CLIENTCERT'], stat.S_IWUSR
+            app.config['CTACS_CLIENTCERT'], stat.S_IWUSR | stat.S_IRUSR
         )  # Write by owner
     if cabundle is not None:
         with open(app.config['CTACS_CABUNDLE'], 'w') as f:
@@ -385,7 +385,7 @@ def upload_main_certificate(user):
             updated.add('CABundle')
         os.chmod(
             app.config['CTACS_CABUNDLE'],
-            stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
+            stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH,
         )
 
     return {
