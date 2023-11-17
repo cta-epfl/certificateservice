@@ -172,9 +172,11 @@ def download_authenticated(f):
 
             if user_token:
                 user = auth.user_for_token(user_token)
-                if user is not None and not auth.check_scopes(
+                if user is not None and (not auth.check_scopes(
                     'access:services!service=certificateservice', user
-                ):
+                ) and not auth.check_scopes(
+                    'access:services!service=downloadservice', user
+                )):
                     return (
                         'Access denied, user-token scopes are insufficient. '
                         + 'If you need access to this service, please '
