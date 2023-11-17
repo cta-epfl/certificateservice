@@ -286,7 +286,7 @@ def get_certificate(user=None):
             cert = own_certificate_file
 
     allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
-    if not user_to_path_fragment(user) in allowed_users:
+    if not user['name'] in allowed_users:
         raise "You do not have any certificate configured"
 
     try:
