@@ -95,6 +95,9 @@ def create_app():
     app.config['CTACS_DISABLE_ALL_AUTH'] = (
         os.getenv('CTACS_DISABLE_ALL_AUTH', 'False') == 'True'
     )
+    app.config['CTACS_MAIN_CERT_ALLOWED_USER'] = os.environ.get(
+        'CTACS_MAIN_CERT_ALLOWED_USER', ''
+    )
 
     # Check certificate folder
     os.makedirs(app.config['CTACS_CERTIFICATE_DIR'], exist_ok=True)
