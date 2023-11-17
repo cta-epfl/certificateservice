@@ -149,8 +149,7 @@ def download_authenticated(f):
                 header_token = None
 
             service_token = (
-                session.get('service-token')
-                or request.args.get('service-token')
+                request.args.get('service-token')
                 or header_token
             )
 
@@ -160,7 +159,7 @@ def download_authenticated(f):
                     'custom:certificateservice:download', service
                 ):
                     return (
-                        'Access denied, token scopes are insufficient. '
+                        'Access denied, service-token scopes are invalid.'
                         + 'If you need access to this service, please '
                         + 'contact CTA-CH DC team at EPFL.',
                         403,
@@ -177,7 +176,7 @@ def download_authenticated(f):
                     'access:services!service=certificateservice', user
                 ):
                     return (
-                        'Access denied, token scopes are insufficient. '
+                        'Access denied, user-token scopes are insufficient. '
                         + 'If you need access to this service, please '
                         + 'contact CTA-CH DC team at EPFL.',
                         403,
