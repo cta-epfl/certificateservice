@@ -287,25 +287,27 @@ def get_certificate(user=None):
 
     allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
     if not user['name'] in allowed_users:
-        raise "You do not have any certificate configured"
+        raise CertificateError('You do not have any certificate configured')
 
     try:
         with open(cert, 'r') as f:
             certificate = f.read()
             if certificate_validity(certificate) <= datetime.now():
                 if own_certificate:
-                    raise 'Your configured certificate is invalid, ' +\
-                        'please refresh it.'
+                    raise CertificateError(
+                        'Your configured certificate is ' +
+                        'invalid, please refresh it.')
                 else:
                     logger.exception('outdated main certificate')
-                    raise 'Service certificate invalid please contact us.'
+                    raise CertificateError(
+                        'Service certificate invalid please contact us.')
 
             return {
                 'certificate': certificate,
                 'cabundle': open(app.config['CTACS_CABUNDLE'], 'r').read(),
             }, 200
     except FileNotFoundError:
-        raise 'no valid certificate configured'
+        raise CertificateError('no valid certificate configured')
 
 
 @app.route(url_prefix + '/certificate', methods=['POST'])
