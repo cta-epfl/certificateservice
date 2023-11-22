@@ -171,23 +171,7 @@ def download_authenticated(f):
                 user = None
 
             # Get user token
-            user_token = request.args.get('user-token')
-
-            if user_token:
-                user = auth.user_for_token(user_token)
-                if user is not None and (not auth.check_scopes(
-                    'access:services!service=certificateservice', user
-                ) and not auth.check_scopes(
-                    'access:services!service=downloadservice', user
-                )):
-                    return (
-                        'Access denied, user-token scopes are insufficient. '
-                        + 'If you need access to this service, please '
-                        + 'contact CTA-CH DC team at EPFL.',
-                        403,
-                    )
-            else:
-                user = None
+            user = request.args.get('user')
 
             if user:
                 return f(user, *args, **kwargs)
@@ -286,7 +270,11 @@ def get_certificate(user=None):
             cert = own_certificate_file
 
     allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
-    if not user['name'] in allowed_users:
+    username = user
+    if user is dict:
+        username = user['name']
+
+    if own_certificate is False and not username in allowed_users:
         raise CertificateError('You do not have any certificate configured')
 
     try:
