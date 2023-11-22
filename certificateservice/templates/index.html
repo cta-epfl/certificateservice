@@ -1,21 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>JupyterHub - certificateservice</title>
-    <link rel="stylesheet" href="./style.css">
-    <link rel="icon" href="./favicon.ico" type="image/x-icon">
-  </head>
-  <body>
-    <main>
-        <h1>JupyterHub CertificateService</h1>  
-        {% if user %}
-            <p>Welcome {{user}}, your access token is {{token}}</p>
-        {% else %}
-            <p>Welcome, please contact us to get acces to the <em>certificate service</em></p>
-        {% endif %}
-    </main>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>JupyterHub - Certificate Service</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" href="./favicon.ico" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+  <header class="p-3 text-bg-dark">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+          <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap">
+            <use xlink:href="#bootstrap"></use>
+          </svg>
+        </a>
+
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+          <li><a href="/" class="nav-link px-2 text-white">Back to Jupyterhub</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+  <main class="container pb-3">
+    <h1>JupyterHub CertificateService</h1>
+    {% if user %}
+    <p>Welcome {{user}} !</p>
+    <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Certificate status</h5>
+        </div>
+        <div class="card-body">
+          {% if outdated_date %}
+          <div class="alert alert-warning" role="alert">
+            Your certificate is outdated since {{ outdated_date}}, please reupload it to continue using JupyterHub and
+            DownloadService !
+          </div>
+          {% else if up_to_date %}
+          <div class="alert alert-success" role="alert">
+            Your certificate is up to date !
+          </div>
+          {% else %}
+          <div class="alert alert-primary" role="alert">
+            You have never uploaded any certificate, please do so to use this service!
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Upload your certificate</h5>
+        </div>
+        <div class="card-body">
+          {% if uploaded %}
+          <div class="alert alert-success" role="alert">
+            Your certificate has been uploaded successfully
+          </div>
+          {% endif %}
+          <form method="post" action="{{ url_for('personnal_certificate_form') }}" enctype="multipart/form-data"
+            class="row">
+            <div class="mb-3">
+              <label for="formFile" class="form-label">Your personnal certificate</label>
+              <input required class="form-control" type="file" name="certificate" id="formFile">
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary mb-3">Upload</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <p>Welcome, please contact us to get acces to the <em>certificate service</em></p>
+    {% endif %}
+  </main>
+</body>
+
 </html>

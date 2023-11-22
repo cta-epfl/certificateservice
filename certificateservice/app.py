@@ -18,6 +18,7 @@ from flask import (
     request,
     session,
     render_template,
+    url_for,
 )
 from flask_cors import CORS
 
@@ -241,9 +242,37 @@ def upload_authenticated(f):
 
 @app.route(url_prefix + '/')
 @upload_authenticated
-def login(user):
+def home(user):
     token = session.get('token') or request.args.get('token')
-    return render_template('index.html', user=user, token=token)
+
+    up_to_date = True
+    outdated_date = ''
+
+    return render_template(
+        'index.html', user=user, up_to_date=up_to_date, uploaded=False)
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route(url_prefix + 'certificate_form', methods=['POST'])
+@upload_authenticated
+def personnal_certificate_form():
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        return redirect(request.url)
+
+    file = request.files['certificate']
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
+    if file.filename == '':
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return redirect(url_for('home', uploaded=True))
 
 
 def user_to_path_fragment(user):
