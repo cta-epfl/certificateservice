@@ -271,7 +271,7 @@ def get_certificate(user=None):
 
     allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
     username = user
-    if user is dict:
+    if isinstance(user, dict):
         username = user['name']
 
     if own_certificate is False and not username in allowed_users:
