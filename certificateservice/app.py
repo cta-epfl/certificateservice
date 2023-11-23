@@ -244,6 +244,8 @@ def upload_authenticated(f):
 @upload_authenticated
 def home(user):
     uploaded = request.args.get('uploaded', False) != False
+    error_message = request.args.get('error_message', None)
+
     up_to_date = None
     validity = None
     outdated = False
@@ -261,7 +263,8 @@ def home(user):
 
     return render_template(
         'index.html', user=username, up_to_date=up_to_date, uploaded=uploaded,
-        outdated=outdated, validity=validity, own_certificate=own_certificate)
+        outdated=outdated, validity=validity, own_certificate=own_certificate,
+        error_message=error_message)
 
 
 def user_to_path_fragment(user):
@@ -331,15 +334,16 @@ def personnal_certificate_form(user):
         return redirect(request.url)
 
     file = request.files['certificate']
-    # If the user does not select a file, the browser submits an
-    # empty file without a filename.
-    if file.filename == '':
-        return redirect(request.url)
-    if file:
-        certificate = file.read()
-        validity = _save_personnal_certificate(user, certificate)
 
-        return redirect(url_for('home', uploaded=True))
+    try:
+        if file.filename == '':
+            return redirect(request.url)
+        if file:
+            certificate = file.read()
+            _save_personnal_certificate(user, certificate)
+    except CertificateError as e:
+        return redirect(url_for('home', error_message=e.message))
+    return redirect(url_for('home', uploaded=True))
 
 
 @app.route(url_prefix + '/certificate', methods=['POST'])

@@ -75,6 +75,11 @@
           <div class="alert alert-success" role="alert">
             Your certificate has been uploaded successfully
           </div>
+          {% elif error_message %}
+          <div class="alert alert-danger" role="alert">
+            An error occured while uploading your certificate :<br />
+            {{ error_message }}
+          </div>
           {% endif %}
           <form method="post" action="{{ url_for('personnal_certificate_form') }}" enctype="multipart/form-data"
             class="row">
