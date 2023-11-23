@@ -31,16 +31,16 @@
   <main class="container pb-3">
     <h1>JupyterHub CertificateService</h1>
     {% if user %}
-    <p>Welcome {{user}} !</p>
+    <p>Welcome {{ user }} !</p>
     <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">Certificate status</h5>
         </div>
         <div class="card-body">
-          {% if outdated_date %}
+          {% if outdated %}
           <div class="alert alert-warning" role="alert">
-            Your certificate is outdated since {{ outdated_date}}, please reupload it to continue using JupyterHub and
+            Your certificate is outdated since {{ validity }}, please reupload it to continue using JupyterHub and
             DownloadService !
           </div>
           {% else if up_to_date %}
@@ -49,7 +49,7 @@
           </div>
           {% else %}
           <div class="alert alert-primary" role="alert">
-            You have never uploaded any certificate, please do so to use this service!
+            You have never uploaded any certificate, please do not use this service!
           </div>
           {% endif %}
         </div>

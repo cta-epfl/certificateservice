@@ -243,36 +243,25 @@ def upload_authenticated(f):
 @app.route(url_prefix + '/')
 @upload_authenticated
 def home(user):
-    token = session.get('token') or request.args.get('token')
+    uploaded = request.args.get('uploaded', False) != False
+    up_to_date = None
+    validity = None
+    outdated = False
 
-    up_to_date = True
-    outdated_date = ''
+    certificate_file, own_certificate = _get_user_certificate(user)
+    if own_certificate == False:
+        up_to_date = False
+        outdated = False
+        validity = None
+    elif True:
+        with open(certificate_file, 'r') as f:
+            certificate = f.read()
+            validity = certificate_validity(certificate)
+            outdated = validity <= datetime.now()
 
     return render_template(
-        'index.html', user=user, up_to_date=up_to_date, uploaded=False)
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@app.route(url_prefix + 'certificate_form', methods=['POST'])
-@upload_authenticated
-def personnal_certificate_form():
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        return redirect(request.url)
-
-    file = request.files['certificate']
-    # If the user does not select a file, the browser submits an
-    # empty file without a filename.
-    if file.filename == '':
-        return redirect(request.url)
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect(url_for('home', uploaded=True))
+        'index.html', user=user, up_to_date=up_to_date, uploaded=uploaded,
+        outdated=outdated, validity=validity)
 
 
 def user_to_path_fragment(user):
@@ -284,30 +273,13 @@ def user_to_path_fragment(user):
 
 @app.route(url_prefix + '/certificate', methods=['GET'])
 @download_authenticated
-def get_certificate(user=None):
-    cert = app.config['CTACS_CLIENTCERT']
-    own_certificate = False
-
-    if user is not None:
-        filename = user_to_path_fragment(user) + ".crt"
-        own_certificate_file = os.path.join(
-            app.config['CTACS_CERTIFICATE_DIR'], filename
-        )
-
-        if os.path.isfile(own_certificate_file):
-            own_certificate = True
-            cert = own_certificate_file
-
-    allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
-    username = user
-    if isinstance(user, dict):
-        username = user['name']
-
-    if own_certificate is False and not username in allowed_users:
+def get_certificate(user):
+    certificate_file, own_certificate = _get_user_certificate(user)
+    if certificate_file is None and own_certificate is False:
         raise CertificateError('You do not have any certificate configured')
 
     try:
-        with open(cert, 'r') as f:
+        with open(certificate_file, 'r') as f:
             certificate = f.read()
             if certificate_validity(certificate) <= datetime.now():
                 if own_certificate:
@@ -327,15 +299,63 @@ def get_certificate(user=None):
         raise CertificateError('no valid certificate configured')
 
 
+def _get_user_certificate(user):
+    certificate_file = app.config['CTACS_CLIENTCERT']
+    own_certificate = False
+
+    filename = user_to_path_fragment(user) + ".crt"
+    own_certificate_file = os.path.join(
+        app.config['CTACS_CERTIFICATE_DIR'], filename
+    )
+
+    if os.path.isfile(own_certificate_file):
+        own_certificate = True
+        certificate_file = own_certificate_file
+
+    allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
+    username = user
+    if isinstance(user, dict):
+        username = user['name']
+
+    if own_certificate is False and not username in allowed_users:
+        return None, False
+
+    return certificate_file, own_certificate
+
+
+@app.route(url_prefix + 'certificate_form', methods=['POST'])
+@upload_authenticated
+def personnal_certificate_form(user):
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        return redirect(request.url)
+
+    file = request.files['certificate']
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
+    if file.filename == '':
+        return redirect(request.url)
+    if file:
+        certificate = file.read()
+        validity = _save_personnal_certificate(user, certificate)
+
+        return redirect(url_for('home', uploaded=True))
+
+
 @app.route(url_prefix + '/certificate', methods=['POST'])
 @upload_authenticated
 def upload_certificate(user):
+    certificate = request.json.get('certificate')
+    validity = _save_personnal_certificate(user, certificate)
+
+    return {'message': 'Certificate stored', 'validity': validity}, 200
+
+
+def _save_personnal_certificate(user, certificate):
     filename = user_to_path_fragment(user) + ".crt"
     certificate_file = os.path.join(
         app.config['CTACS_CERTIFICATE_DIR'], filename
     )
-
-    certificate = request.json.get('certificate')
 
     try:
         cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
@@ -362,7 +382,7 @@ def upload_certificate(user):
         f.write(certificate)
     os.chmod(certificate_file, stat.S_IWUSR | stat.S_IRUSR)
 
-    return {'message': 'Certificate stored', 'validity': validity}, 200
+    return validity
 
 
 @app.route(url_prefix + '/main-certificate', methods=['POST'])
