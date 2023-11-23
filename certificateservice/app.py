@@ -252,11 +252,7 @@ def home(user):
         username = user['name']
 
     certificate_file, own_certificate = _get_user_certificate(user)
-    if own_certificate == False:
-        up_to_date = False
-        outdated = False
-        validity = None
-    elif True:
+    if certificate_file:
         with open(certificate_file, 'r') as f:
             certificate = f.read()
             validity = certificate_validity(certificate)
@@ -264,7 +260,7 @@ def home(user):
 
     return render_template(
         'index.html', user=username, up_to_date=up_to_date, uploaded=uploaded,
-        outdated=outdated, validity=validity)
+        outdated=outdated, validity=validity, own_certificate=own_certificate)
 
 
 def user_to_path_fragment(user):
