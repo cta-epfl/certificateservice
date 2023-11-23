@@ -257,6 +257,7 @@ def home(user):
             certificate = f.read()
             validity = certificate_validity(certificate)
             outdated = validity <= datetime.now()
+            up_to_date = not outdated
 
     return render_template(
         'index.html', user=username, up_to_date=up_to_date, uploaded=uploaded,
