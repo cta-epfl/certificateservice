@@ -336,13 +336,16 @@ def personnal_certificate_form(user):
         return redirect(
             url_for('home', error_message='Missing the certificate file'))
 
-    file = str(request.files['certificate'])
+    file = request.files['certificate']
 
     try:
         if file.filename == '':
-            return redirect(request.url)
+            return redirect(
+                url_for(
+                    'home',
+                    error_message='Missing certificate file'))
         if file:
-            certificate = file.read()
+            certificate = str(file.read())
             _save_personnal_certificate(user, certificate)
     except CertificateError as e:
         return redirect(url_for('home', error_message=e.message))
