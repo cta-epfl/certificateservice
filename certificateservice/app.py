@@ -333,7 +333,7 @@ def personnal_certificate_form(user):
         return redirect(
             url_for('home', error_message='Missing the certificate file'))
 
-    file = request.files['certificate']
+    file = str(request.files['certificate'])
 
     try:
         if file.filename == '':
