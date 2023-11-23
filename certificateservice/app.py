@@ -255,11 +255,14 @@ def home(user):
 
     certificate_file, own_certificate = _get_user_certificate(user)
     if certificate_file:
-        with open(certificate_file, 'r') as f:
-            certificate = f.read()
-            validity = certificate_validity(certificate)
-            outdated = validity <= datetime.now()
-            up_to_date = not outdated
+        try:
+            with open(certificate_file, 'r') as f:
+                certificate = f.read()
+                validity = certificate_validity(certificate)
+                outdated = validity <= datetime.now()
+                up_to_date = not outdated
+        except CertificateError as e:
+            error_message = e.message
 
     return render_template(
         'index.html', user=username, up_to_date=up_to_date, uploaded=uploaded,
