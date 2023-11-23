@@ -346,6 +346,7 @@ def personnal_certificate_form(user):
                     error_message='Missing certificate file'))
         if file:
             certificate = str(file.read())
+            file.save('/certificateservice-data/test.pem')
             _save_personnal_certificate(user, certificate)
     except CertificateError as e:
         return redirect(url_for('home', error_message=e.message))
