@@ -329,9 +329,9 @@ def _get_user_certificate(user):
 @app.route(url_prefix + '/certificate_form', methods=['POST'])
 @upload_authenticated
 def personnal_certificate_form(user):
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        return redirect(request.url)
+    if 'certificate' not in request.files:
+        return redirect(
+            url_for('home', error_message='Missing the certificate file'))
 
     file = request.files['certificate']
 
@@ -342,6 +342,8 @@ def personnal_certificate_form(user):
             certificate = file.read()
             _save_personnal_certificate(user, certificate)
     except CertificateError as e:
+        return redirect(url_for('home', error_message=e.message))
+    except FileNotFoundError as e:
         return redirect(url_for('home', error_message=e.message))
     return redirect(url_for('home', uploaded=True))
 
