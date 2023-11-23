@@ -323,7 +323,7 @@ def _get_user_certificate(user):
     return certificate_file, own_certificate
 
 
-@app.route(url_prefix + 'certificate_form', methods=['POST'])
+@app.route(url_prefix + '/certificate_form', methods=['POST'])
 @upload_authenticated
 def personnal_certificate_form(user):
     # check if the post request has the file part
