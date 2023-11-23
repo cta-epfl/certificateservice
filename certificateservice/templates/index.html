@@ -38,6 +38,17 @@
           <h2 class="card-title">Certificate status</h5>
         </div>
         <div class="card-body">
+          {% if not own_certificate %}
+          {% if outdated %}
+          <div class="alert alert-warning" role="alert">
+            The shared certificate is expired, please contact us to reupload a new one, or upload your own.
+          </div>
+          {% else %}
+          <div class="alert alert-success" role="alert">
+            The shared certificate is up to date ! The expiring validity is {{ validity }}.
+          </div>
+          {% endif %}
+          {% else %}
           {% if outdated %}
           <div class="alert alert-warning" role="alert">
             Your certificate is outdated since {{ validity }}, please reupload it to continue using JupyterHub and
@@ -45,12 +56,13 @@
           </div>
           {% elif up_to_date %}
           <div class="alert alert-success" role="alert">
-            Your certificate is up to date !
+            Your certificate is up to date ! The expiring validity is {{ validity }}.
           </div>
           {% else %}
           <div class="alert alert-primary" role="alert">
-            You have never uploaded any certificate, please do not use this service!
+            You have never uploaded any certificate, please do so to use this service!
           </div>
+          {% endif %}
           {% endif %}
         </div>
       </div>

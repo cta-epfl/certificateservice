@@ -247,6 +247,9 @@ def home(user):
     up_to_date = None
     validity = None
     outdated = False
+    username = user
+    if isinstance(user, dict):
+        username = user['name']
 
     certificate_file, own_certificate = _get_user_certificate(user)
     if own_certificate == False:
@@ -260,7 +263,7 @@ def home(user):
             outdated = validity <= datetime.now()
 
     return render_template(
-        'index.html', user=user, up_to_date=up_to_date, uploaded=uploaded,
+        'index.html', user=username, up_to_date=up_to_date, uploaded=uploaded,
         outdated=outdated, validity=validity)
 
 
