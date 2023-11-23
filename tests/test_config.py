@@ -1,7 +1,27 @@
 from conftest import ca_certificate, sign_certificate
 from flask import url_for
+import io
 import pytest
 from typing import Any
+
+
+@pytest.mark.timeout(30)
+def test_upload_cert_form(app: Any, client: Any):
+    certificate = sign_certificate(app.ca, 1)
+    data = {"certificate": (io.BytesIO(
+        bytes(certificate, encoding='UTF-8')), "certificate.pem")}
+
+    client.post(
+        url_for('personnal_certificate_form'),
+        data=data,
+        buffered=True,
+        content_type="multipart/form-data",
+    )
+
+    r = client.get(url_for('get_certificate'))
+    assert r.status_code == 200 and \
+        r.json['certificate'] == certificate and \
+        r.json['cabundle'] == open(app.config['CTACS_CABUNDLE'], 'r').read()
 
 
 @pytest.mark.timeout(30)
