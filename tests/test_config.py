@@ -8,8 +8,9 @@ from typing import Any
 @pytest.mark.timeout(30)
 def test_upload_cert_form(app: Any, client: Any):
     certificate = sign_certificate(app.ca, 1)
-    data = {"certificate": (io.BytesIO(
-        bytes(certificate, encoding='UTF-8')), "certificate.pem")}
+    data = {'certificate': (
+        io.BytesIO(bytes(certificate, encoding='UTF-8')), 'certificate.pem'
+    )}
 
     client.post(
         url_for('personnal_certificate_form'),
