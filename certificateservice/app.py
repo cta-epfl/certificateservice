@@ -243,7 +243,7 @@ def upload_authenticated(f):
 @app.route(url_prefix + '/')
 @upload_authenticated
 def home(user):
-    uploaded = request.args.get('uploaded', False) != False
+    uploaded = request.args.get('uploaded', False) is not False
     error_message = request.args.get('error_message', None)
 
     up_to_date = None
@@ -323,7 +323,7 @@ def _get_user_certificate(user):
     if isinstance(user, dict):
         username = user['name']
 
-    if own_certificate is False and not username in allowed_users:
+    if own_certificate is False and username not in allowed_users:
         return None, False
 
     return certificate_file, own_certificate
