@@ -1,6 +1,6 @@
 #!/bin/bash
 
-kubeconfig_file=/projects/k8s_config_file.yaml
+kubeconfig_file=/projects/k8s_config.yaml
 cabundle_file=certificate/cabundle.pem
 clientcert_file=certificate/x509up_u1000
 
@@ -20,16 +20,16 @@ echo
 echo STAGING UPLOAD ...
 echo Uploading cabundle file \'$cabundle_file\' to staging
 kubectl --kubeconfig $kubeconfig_file cp -n jh-staging-system $cabundle_file "${staging_pod}:/certificateservice-data/dcache_cabundle.pem"
-echo Uploading clientcert file \'$clientcert_file\' to staging
-kubectl --kubeconfig $kubeconfig_file cp -n jh-staging-system $clientcert_file "${staging_pod}:/certificateservice-data/dcache_clientcert.crt"
+# echo Uploading clientcert file \'$clientcert_file\' to staging
+# kubectl --kubeconfig $kubeconfig_file cp -n jh-staging-system $clientcert_file "${staging_pod}:/certificateservice-data/dcache_clientcert.crt"
 
 # Production
 echo
 echo PRODUCTION UPLOAD ...
 echo Uploading cabundle file \'$cabundle_file\' to production
 kubectl --kubeconfig $kubeconfig_file cp -n jh-prod-system $cabundle_file "${production_pod}:/certificateservice-data/dcache_cabundle.pem"
-echo Uploading clientcert file \'$clientcert_file\' to production
-kubectl --kubeconfig $kubeconfig_file cp -n jh-prod-system $clientcert_file "${production_pod}:/certificateservice-data/dcache_clientcert.crt"
+# echo Uploading clientcert file \'$clientcert_file\' to production
+# kubectl --kubeconfig $kubeconfig_file cp -n jh-prod-system $clientcert_file "${production_pod}:/certificateservice-data/dcache_clientcert.crt"
 
 # Finish
 echo

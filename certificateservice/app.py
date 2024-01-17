@@ -295,7 +295,7 @@ def get_certificate(user):
                 else:
                     logger.exception('outdated main certificate')
                     raise CertificateError(
-                        'Service certificate invalid please contact us.')
+                        'Configured certificate invalid please contact us.')
 
             return {
                 'certificate': certificate,
@@ -405,15 +405,11 @@ def upload_main_certificate(user):
 
     data = request.json
     certificate = data.get('certificate', None)
-    cabundle = data.get('cabundle', None)
 
-    if certificate is None and cabundle is None:
+    if certificate is None:
         return 'requests missing certificate or cabundle', 400
 
-    if cabundle is None:
-        cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
-    if certificate is None:
-        certificate = open(app.config['CTACS_CLIENTCERT'], 'r').read()
+    cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
     verify_certificate(cabundle, certificate)
 
     if certificate and certificate_validity(certificate).date() > (
@@ -426,27 +422,15 @@ def upload_main_certificate(user):
             400,
         )
 
-    updated = set()
-    if certificate is not None:
-        with open(app.config['CTACS_CLIENTCERT'], 'w') as f:
-            f.write(certificate)
-            updated.add('Certificate')
-        os.chmod(
-            app.config['CTACS_CLIENTCERT'], stat.S_IWUSR | stat.S_IRUSR
-        )  # Write by owner
-    if cabundle is not None:
-        with open(app.config['CTACS_CABUNDLE'], 'w') as f:
-            f.write(cabundle)
-            updated.add('CABundle')
-        os.chmod(
-            app.config['CTACS_CABUNDLE'],
-            stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH,
-        )
+    with open(app.config['CTACS_CLIENTCERT'], 'w') as f:
+        f.write(certificate)
+    os.chmod(
+        app.config['CTACS_CLIENTCERT'], stat.S_IWUSR | stat.S_IRUSR
+    )  # Write by owner
 
     return {
-        'message': ' and '.join(updated) + ' stored',
-        'cabundleUploaded': cabundle is not None,
-        'certificateUploaded': certificate is not None,
+        'message': 'Shared certificate stored',
+        'certificateUploaded': True,
     }, 200
 
 

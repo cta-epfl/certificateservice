@@ -120,17 +120,3 @@ def test_original_maincert_config(app: Any, client: Any):
         'certificate validity too long, please generate a ' +\
         'short-lived (max 7 day) proxy certificate for uploading. ' +\
         'Please see https://ctaodc.ch/ for more details.'
-
-
-@pytest.mark.timeout(30)
-def test_valid_maincert_config(app: Any, client: Any):
-    with ca_certificate() as alt_ca:
-        certificate = sign_certificate(alt_ca, 1)
-        r = client.post(
-            url_for('upload_main_certificate'),
-            json={
-                'certificate': certificate,
-                'cabundle': open(alt_ca['crt_file'], 'r').read()
-            }
-        )
-        assert r.status_code == 200
