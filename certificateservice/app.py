@@ -280,7 +280,7 @@ def shared_certificate_status():
                 certificate = f.read()
                 validity = certificate_validity(certificate)
                 outdated = validity <= datetime.now()
-        except CertificateError as e:
+        except CertificateError:
             return 'Shared certificate outdated', 500
 
     if outdated:

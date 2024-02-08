@@ -1,4 +1,4 @@
-from conftest import ca_certificate, sign_certificate
+from conftest import sign_certificate
 import tempfile
 import pytest
 import ctadata
@@ -24,18 +24,15 @@ def test_apiclient_upload_certificate(testing_certificate_service):
 def test_apiclient_upload_admin_cert(testing_certificate_service):
     ctadata.APIClient.certificateservice = testing_certificate_service['url']
 
-    with ca_certificate() as alt_ca:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            cert_file = f"{tmpdir}/cert-file"
-            certificate = sign_certificate(alt_ca, 1)
-            open(cert_file, 'w').write(certificate)
-            res = ctadata.upload_shared_certificate(
-                certificate_file_path=cert_file,
-                cabundle_file_path=alt_ca['crt_file'],
-            )
-        assert (
-            type(res) is dict
-            and res['message'] is not None
-            and res['cabundleUploaded'] is True
-            and res['certificateUploaded'] is True
+    with tempfile.TemporaryDirectory() as tmpdir:
+        cert_file = f"{tmpdir}/cert-file"
+        certificate = sign_certificate(testing_certificate_service['ca'], 1)
+        open(cert_file, 'w').write(certificate)
+        res = ctadata.upload_shared_certificate(
+            certificate_file_path=cert_file,
         )
+    assert (
+        type(res) is dict
+        and res['message'] is not None
+        and res['certificateUploaded'] is True
+    )
