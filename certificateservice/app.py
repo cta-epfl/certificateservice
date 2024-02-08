@@ -240,6 +240,56 @@ def upload_authenticated(f):
     return decorated
 
 
+@app.route(url_prefix + '/oauth_callback')
+def oauth_callback():
+    code = request.args.get('code', None)
+    if code is None:
+        return 'Error: oauth callback code', 403
+
+    # validate state field
+    arg_state = request.args.get('state', None)
+    cookie_state = request.cookies.get(auth.state_cookie_name)
+    if arg_state is None or arg_state != cookie_state:
+        # state doesn't match
+        return 'Error: oauth callback invalid state', 403
+
+    token = auth.token_for_code(code)
+    # store token in session cookie
+    session['token'] = token
+    next_url = auth.get_next_url(cookie_state) or url_prefix
+    response = make_response(redirect(next_url))
+    return response
+
+
+@app.route(url_prefix + '/health')
+def health():
+    # Different from /shared-certificate-status as the service
+    # might work without shared certificate
+    return 'OK', 200
+
+
+@app.route(url_prefix + '/shared-certificate-status')
+def shared_certificate_status():
+    validity = None
+    outdated = False
+
+    shared_certificate_file = app.config['CTACS_CLIENTCERT']
+    if shared_certificate_file:
+        try:
+            with open(shared_certificate_file, 'r') as f:
+                certificate = f.read()
+                validity = certificate_validity(certificate)
+                outdated = validity <= datetime.now()
+        except CertificateError as e:
+            return 'Shared certificate outdated', 500
+
+    if outdated:
+        return 'OK', 200
+    else:
+        logger.error('Shared certificated is outdated')
+        return 'Shared certificate outdated', 500
+
+
 @app.route(url_prefix + '/')
 @upload_authenticated
 def home(user):
@@ -432,36 +482,3 @@ def upload_main_certificate(user):
         'message': 'Shared certificate stored',
         'certificateUploaded': True,
     }, 200
-
-
-@app.route(url_prefix + '/health')
-def health():
-    # TODO: health status check
-    return 'OK', 200
-
-    # if r.status_code in [200, 207]:
-    #     return 'OK', 200
-    # else:
-    #     logger.error('service is unhealthy: %s', r.content.decode())
-    #     return 'Unhealthy!', 500
-
-
-@app.route(url_prefix + '/oauth_callback')
-def oauth_callback():
-    code = request.args.get('code', None)
-    if code is None:
-        return 'Error: oauth callback code', 403
-
-    # validate state field
-    arg_state = request.args.get('state', None)
-    cookie_state = request.cookies.get(auth.state_cookie_name)
-    if arg_state is None or arg_state != cookie_state:
-        # state doesn't match
-        return 'Error: oauth callback invalid state', 403
-
-    token = auth.token_for_code(code)
-    # store token in session cookie
-    session['token'] = token
-    next_url = auth.get_next_url(cookie_state) or url_prefix
-    response = make_response(redirect(next_url))
-    return response
