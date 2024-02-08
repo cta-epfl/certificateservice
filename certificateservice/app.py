@@ -283,7 +283,7 @@ def shared_certificate_status():
         except CertificateError:
             return 'Shared certificate outdated', 500
 
-    if outdated:
+    if not outdated:
         return 'OK', 200
     else:
         logger.error('Shared certificated is outdated')
