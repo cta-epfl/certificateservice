@@ -265,7 +265,7 @@ def oauth_callback():
 def health():
     # Different from /shared-certificate-status as the service
     # might work without shared certificate
-    return 'OK', 200
+    return 'OK - CertificateService up and running', 200
 
 
 @app.route(url_prefix + '/shared-certificate-status')
@@ -281,13 +281,13 @@ def shared_certificate_status():
                 validity = certificate_validity(certificate)
                 outdated = validity <= datetime.now()
         except CertificateError:
-            return 'Shared certificate outdated', 500
+            return 'Unhealthy! - Shared certificate is outdated', 500
 
     if not outdated:
-        return 'OK', 200
+        return 'OK - Shared certificate configured and valid', 200
     else:
         logger.error('Shared certificated is outdated')
-        return 'Shared certificate outdated', 500
+        return 'Unhealthy! - Shared certificate is outdated', 500
 
 
 @app.route(url_prefix + '/')
