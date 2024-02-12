@@ -345,7 +345,8 @@ def get_certificate(user):
                 else:
                     logger.exception('outdated main certificate')
                     raise CertificateError(
-                        'Configured certificate invalid please contact CTAO CD Admin team.')
+                        'Configured certificate invalid please contact CTAO '
+                        + 'CD Admin team.')
             return {
                 'certificate': certificate,
                 'cabundle': open(app.config['CTACS_CABUNDLE'], 'r').read(),
