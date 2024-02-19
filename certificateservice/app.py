@@ -419,15 +419,16 @@ def _save_personnal_certificate(user, certificate):
         app.config['CTACS_CERTIFICATE_DIR'], filename
     )
 
-    try:
-        cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
-    except FileNotFoundError:
-        return (
-            'certificateservice cabundle not configured, '
-            + 'please contact the administrator',
-            500,
-        )
-    verify_certificate(cabundle, certificate)
+    # TODO: Enable once `unable to get local issuer certificate` is fixed
+    # try:
+    #     cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
+    # except FileNotFoundError:
+    #     return (
+    #         'certificateservice cabundle not configured, '
+    #         + 'please contact the administrator',
+    #         500,
+    #     )
+    # verify_certificate(cabundle, certificate)
 
     validity = certificate_validity(certificate)
     if validity.date() > date.today() + timedelta(days=7):
