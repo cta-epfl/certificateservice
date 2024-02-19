@@ -28,9 +28,9 @@ kubectl --kubeconfig $kubeconfig_file cp -n jh-staging-system "${staging_pod}:/c
 echo
 echo PRODUCTION DOWNLOAD ...
 echo Downloading cabundle file \'$cabundle_file\' to production
-kubectl --kubeconfig $kubeconfig_file cp -n jh-prod-system "${production_pod}:/downloadservice-data/dcache_cabundle.pem" "${download_folder}/prod_$cabundle_file"
+kubectl --kubeconfig $kubeconfig_file cp -n jh-prod-system "${production_pod}:/certificateservice-data/dcache_cabundle.pem" "${download_folder}/prod_$cabundle_file"
 echo Downloading clientcert file \'$clientcert_file\' to production
-kubectl --kubeconfig $kubeconfig_file cp -n jh-prod-system "${production_pod}:/downloadservice-data/dcache_clientcert.crt" "${download_folder}/prod_$clientcert_file"
+kubectl --kubeconfig $kubeconfig_file cp -n jh-prod-system "${production_pod}:/certificateservice-data/dcache_clientcert.crt" "${download_folder}/prod_$clientcert_file"
 
 # Finish
 echo

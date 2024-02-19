@@ -35,7 +35,8 @@ def verify_certificate(cabundle, certificate):
             raise CertificateError("certificate expired")
 
     except OpenSSL.crypto.X509StoreContextError:
-        raise CertificateError('invalid certificate verification chain')
+        raise CertificateError(
+            'invalid certificate verification chain : '+str(e))
     except OpenSSL.crypto.Error as e:
         raise CertificateError('invalid certificate : '+str(e))
 
