@@ -460,8 +460,8 @@ def upload_main_certificate(user):
     if certificate is None:
         return 'requests missing certificate or cabundle', 400
 
-    cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
-    verify_certificate(cabundle, certificate)
+    # cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
+    # verify_certificate(cabundle, certificate)
 
     if certificate and certificate_validity(certificate).date() > (
         date.today() + timedelta(days=7)
