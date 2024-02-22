@@ -419,15 +419,15 @@ def _save_personnal_certificate(user, certificate):
         app.config['CTACS_CERTIFICATE_DIR'], filename
     )
 
-    try:
-        cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
-    except FileNotFoundError:
-        return (
-            'certificateservice cabundle not configured, '
-            + 'please contact the administrator',
-            500,
-        )
-    verify_certificate(cabundle, certificate)
+    # try:
+    #     cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
+    # except FileNotFoundError:
+    #     return (
+    #         'certificateservice cabundle not configured, '
+    #         + 'please contact the administrator',
+    #         500,
+    #     )
+    # verify_certificate(cabundle, certificate)
 
     validity = certificate_validity(certificate)
     if validity.date() > date.today() + timedelta(days=7):
@@ -459,8 +459,8 @@ def upload_main_certificate(user):
     if certificate is None:
         return 'requests missing certificate or cabundle', 400
 
-    cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
-    verify_certificate(cabundle, certificate)
+    # cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
+    # verify_certificate(cabundle, certificate)
 
     if certificate and certificate_validity(certificate).date() > (
         date.today() + timedelta(days=7)
@@ -472,11 +472,10 @@ def upload_main_certificate(user):
             400,
         )
 
-    with open(app.config['CTACS_CLIENTCERT'], 'w') as f:
+    certificate_file = app.config['CTACS_CLIENTCERT']
+    with open(certificate_file, 'w') as f:
         f.write(certificate)
-    os.chmod(
-        app.config['CTACS_CLIENTCERT'], stat.S_IWUSR | stat.S_IRUSR
-    )  # Write by owner
+    os.chmod(certificate_file, stat.S_IWUSR | stat.S_IRUSR)
 
     return {
         'message': 'Shared certificate stored',
