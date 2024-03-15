@@ -296,7 +296,7 @@ def home(user):
     uploaded = request.args.get('uploaded', False) is not False
     error_message = request.args.get('error_message', None)
 
-    up_to_date = None
+    up_to_date = False
     validity = None
     outdated = False
     username = user
@@ -331,7 +331,7 @@ def user_to_path_fragment(user):
 @download_authenticated
 def get_certificate(user):
     certificate_file, own_certificate = _get_user_certificate(user)
-    if certificate_file is None and own_certificate is False:
+    if certificate_file is None and own_certificate is True:
         raise CertificateError('You do not have any certificate configured')
 
     try:
@@ -341,7 +341,7 @@ def get_certificate(user):
                 if own_certificate:
                     raise CertificateError(
                         'Your configured certificate is ' +
-                        'invalid, please refresh it.')
+                        'invalid, please reupload it.')
                 else:
                     logger.exception('outdated main certificate')
                     raise CertificateError(
@@ -374,7 +374,7 @@ def _get_user_certificate(user):
         username = user['name']
 
     if own_certificate is False and username not in allowed_users:
-        return None, False
+        return None, True
 
     return certificate_file, own_certificate
 

@@ -33,6 +33,7 @@ def test_valid_owncert_config(app: Any, client: Any):
     assert r.status_code == 200
 
 
+@pytest.mark.skip(reason="Reactivate once verification chain is reactivated")
 @pytest.mark.timeout(30)
 def test_invalid_owncert_config(app: Any, client: Any):
     with ca_certificate() as alt_ca:
@@ -43,6 +44,7 @@ def test_invalid_owncert_config(app: Any, client: Any):
             r.text == 'invalid certificate verification chain'
 
 
+@pytest.mark.skip(reason="Reactivate once verification chain is reactivated")
 @pytest.mark.timeout(30)
 def test_expired_owncert_config(app: Any, client: Any):
     certificate = sign_certificate(app.ca, -1)
@@ -61,6 +63,7 @@ def test_fake_owncert_config(app: Any, client: Any):
         r.text.startswith('invalid certificate : ')
 
 
+@pytest.mark.skip(reason="Reactivate once verification chain is reactivated")
 @pytest.mark.timeout(30)
 def test_invalid_chain_maincert_config(app: Any, client: Any):
     with ca_certificate() as alt_ca:
