@@ -367,6 +367,8 @@ def _get_user_certificate(user):
     if os.path.isfile(own_certificate_file):
         own_certificate = True
         certificate_file = own_certificate_file
+    elif not os.path.isfile(certificate_file):
+        return None, True
 
     allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
     username = user
