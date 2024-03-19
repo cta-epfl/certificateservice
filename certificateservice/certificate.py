@@ -16,22 +16,24 @@ def verify_certificate(cabundle, certificate):
             '-----END CERTIFICATE-----\r?\n?', re.DOTALL)
 
         def parse_chain(chain):
-            # returns a list of certificates
-            return [c.group() for c in _PEM_RE.finditer(chain)]
+            return [OpenSSL.crypto.load_certificate(
+                OpenSSL.crypto.FILETYPE_PEM, c.group())
+                for c in _PEM_RE.finditer(chain)]
 
-        client_cert = OpenSSL.crypto.load_certificate(
-            OpenSSL.crypto.FILETYPE_PEM, certificate)
+        certificates = parse_chain(certificate)
+        if len(certificates) == 0:
+            raise CertificateError("no valid certificate provided")
 
         store = OpenSSL.crypto.X509Store()
         store.set_flags(OpenSSL.crypto.X509StoreFlags.ALLOW_PROXY_CERTS)
         for cert in parse_chain(cabundle):
-            store.add_cert(OpenSSL.crypto.load_certificate(
-                OpenSSL.crypto.FILETYPE_PEM, cert))
+            store.add_cert(cert)
 
-        ctx = OpenSSL.crypto.X509StoreContext(store, client_cert)
+        ctx = OpenSSL.crypto.X509StoreContext(store, certificates[0],
+                                              chain=certificates[1:])
         ctx.verify_certificate()
 
-        if client_cert.has_expired():
+        if certificates[0].has_expired():
             raise CertificateError("certificate expired")
 
     except OpenSSL.crypto.X509StoreContextError:
