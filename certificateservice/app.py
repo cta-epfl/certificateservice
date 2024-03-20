@@ -367,6 +367,8 @@ def _get_user_certificate(user):
     if os.path.isfile(own_certificate_file):
         own_certificate = True
         certificate_file = own_certificate_file
+    elif not os.path.isfile(certificate_file):
+        return None, True
 
     allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
     username = user
@@ -419,15 +421,15 @@ def _save_personnal_certificate(user, certificate):
         app.config['CTACS_CERTIFICATE_DIR'], filename
     )
 
-    # try:
-    #     cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
-    # except FileNotFoundError:
-    #     return (
-    #         'certificateservice cabundle not configured, '
-    #         + 'please contact the administrator',
-    #         500,
-    #     )
-    # verify_certificate(cabundle, certificate)
+    try:
+        cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
+    except FileNotFoundError:
+        return (
+            'certificateservice cabundle not configured, '
+            + 'please contact the administrator',
+            500,
+        )
+    verify_certificate(cabundle, certificate)
 
     validity = certificate_validity(certificate)
     if validity.date() > date.today() + timedelta(days=7):
@@ -459,8 +461,8 @@ def upload_main_certificate(user):
     if certificate is None:
         return 'requests missing certificate or cabundle', 400
 
-    # cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
-    # verify_certificate(cabundle, certificate)
+    cabundle = open(app.config['CTACS_CABUNDLE'], 'r').read()
+    verify_certificate(cabundle, certificate)
 
     if certificate and certificate_validity(certificate).date() > (
         date.today() + timedelta(days=7)
