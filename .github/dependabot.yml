@@ -9,6 +9,6 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-  groups:
-    dependencies:
-      applies-to: "version-updates"
+    groups:
+      dependencies:
+        applies-to: "version-updates"
