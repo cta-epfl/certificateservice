@@ -19,7 +19,7 @@ optional = true
 
 [tool.poetry.group.test.dependencies]
 ctadata = { git = "https://github.com/cta-epfl/ctadata.git", tag = "v0.4.6" }
-pytest = "^7.3.2"
+pytest = "^8.1.1"
 psutil = "^5.9.5"
 pytest-flask = "^1.2.0"
 pytest-timeout = "^2.1.0"
