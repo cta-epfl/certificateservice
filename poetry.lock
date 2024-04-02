@@ -676,13 +676,13 @@ traitlets = "*"
 
 [[package]]
 name = "jupyterhub"
-version = "4.0.2"
+version = "4.1.4"
 description = "JupyterHub: A multi-user server for Jupyter notebooks"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "jupyterhub-4.0.2-py3-none-any.whl", hash = "sha256:2f389e7d3067e1b11bb4091719048eedecee161039fd2e5b025d031f7ab23c62"},
-    {file = "jupyterhub-4.0.2.tar.gz", hash = "sha256:d4e450eed8d90dfbcf0eca08f00f2093a0bce74dc51f7cfc0b7057f602341a1d"},
+    {file = "jupyterhub-4.1.4-py3-none-any.whl", hash = "sha256:c6cd33a07f614a61bf9a40106e5187275986f108164cdcc39dd0157d50631c67"},
+    {file = "jupyterhub-4.1.4.tar.gz", hash = "sha256:773c82bfeed9a57daabda32579cf834d553827337600368320e822e73f6c92dd"},
 ]
 
 [package.dependencies]
@@ -704,7 +704,7 @@ tornado = ">=5.1"
 traitlets = ">=4.3.2"
 
 [package.extras]
-test = ["beautifulsoup4[html5lib]", "coverage", "cryptography", "jsonschema", "jupyterlab (>=3)", "mock", "nbclassic", "playwright", "pytest (>=3.3)", "pytest-asyncio (>=0.17)", "pytest-cov", "requests-mock", "virtualenv"]
+test = ["beautifulsoup4[html5lib]", "coverage", "cryptography", "jsonschema", "jupyterlab (>=3)", "mock", "nbclassic", "playwright", "pytest (>=3.3,<8)", "pytest-asyncio (>=0.17,<0.23)", "pytest-cov", "pytest-rerunfailures", "requests-mock", "virtualenv"]
 
 [[package]]
 name = "mako"
@@ -1510,4 +1510,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "0a9417faedaf27a46ae4873a1c27b610f8af1c0b91d2c3316d4b8f7fbbdd8658"
+content-hash = "fda7b8253f5fb7afa25769044b07bb06a74a34fec443c9e49ab7259b76af4b89"
