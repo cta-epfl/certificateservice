@@ -103,7 +103,6 @@ def create_app():
         'CTACS_ALLOWED_CERT_KEYS', 'cta,lst'
     ).split(',')
 
-
     # Check certificate folder
     os.makedirs(app.config['CTACS_CERTIFICATE_DIR'], exist_ok=True)
 
@@ -338,7 +337,8 @@ def user_to_path_fragment(user):
 @app.route(url_prefix + '/certificate', methods=['GET'])
 @download_authenticated
 def get_certificate(user):
-    cert_key = request.form.get('certificate_key')
+    cert_key = request.args.get(
+        'certificate_key', request.form.get('certificate_key'))
     certificate_file, own_certificate = _get_user_certificate(user, cert_key)
     if certificate_file is None and own_certificate is True:
         raise CertificateError('You do not have any certificate configured')
@@ -398,7 +398,8 @@ def personnal_certificate_form(user):
             url_for('home', error_message='Missing the certificate file'))
 
     file = request.files['certificate']
-    cert_key = request.form.get('certificate_key')
+    cert_key = request.args.get(
+        'certificate_key', request.form.get('certificate_key'))
     if cert_key is None or cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
         raise f"Invalid certificate key : {cert_key}"
 
