@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "certificateservice"
-version = "0.4.2"
+version = "0.4.3"
 description = ""
 authors = ["Bastien Wermeille <bastien.wermeille@proton.me>"]
 
