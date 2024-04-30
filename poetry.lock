@@ -355,7 +355,7 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "ctadata"
-version = "0.4.6"
+version = "0.5.1"
 description = ""
 optional = false
 python-versions = "^3.8"
@@ -372,8 +372,8 @@ webdav4 = "^0.9.8"
 [package.source]
 type = "git"
 url = "https://github.com/cta-epfl/ctadata.git"
-reference = "v0.4.6"
-resolved_reference = "a91b3c0ef77205b4b5ecd71c25059cd84367ad03"
+reference = "v0.5.1"
+resolved_reference = "068e380c99d9801c57693aa45664a4537d2a285a"
 
 [[package]]
 name = "exceptiongroup"
@@ -1511,4 +1511,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "c1a3b29ca59fac2a1d949cdf26eaee45dec0dae76bd1ad8b22d555755a8d7c03"
+content-hash = "88758cedf3f52a59acdc7bf6bbab9d5aa296430705d4a4f0f7a46f9e84e97037"
