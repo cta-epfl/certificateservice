@@ -87,6 +87,14 @@
               <label for="formFile" class="form-label">Your personnal certificate</label>
               <input required class="form-control" type="file" name="certificate" id="formFile">
             </div>
+            <div class="mb-3">
+              <label for="certKey" class="form-label">Certificate key</label>
+              <select class="form-select" name="certificate_key" id="certKey" aria-label="Default select example">
+                <option value="arc" selected>ARC</option>
+                <option value="cta">CTA</option>
+                <option value="lst">LST</option>
+              </select>
+            </div>
             <div class="col-auto">
               <button type="submit" class="btn btn-primary mb-3">Upload</button>
             </div>
