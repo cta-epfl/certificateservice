@@ -58,7 +58,7 @@ def test_expired_owncert_config(app: Any, client: Any):
                     'certificate_key': 'cta',
                     })
     assert r.status_code == 400 and \
-        r.text == 'no valid certificate provided'
+        r.text == 'invalid certificate verification chain'
 
 
 @pytest.mark.timeout(30)
