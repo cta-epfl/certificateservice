@@ -308,7 +308,8 @@ def home(user):
 
     # TODO: display all certificates available
     cert_key = app.config['CTACS_ALLOWED_CERT_KEYS'][0]
-    if cert_key is None or cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
+    if cert_key is None or \
+       cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
         raise f"Invalid certificate key : {cert_key}"
     certificate_file, own_certificate = _get_user_certificate(user, cert_key)
     if certificate_file:
@@ -399,7 +400,8 @@ def personnal_certificate_form(user):
 
     file = request.files['certificate']
     cert_key = request.form.get('certificate_key')
-    if cert_key is None or cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
+    if cert_key is None or \
+       cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
         raise f"Invalid certificate key : {cert_key}"
 
     try:
@@ -423,7 +425,8 @@ def personnal_certificate_form(user):
 def upload_certificate(user):
     certificate = request.json.get('certificate')
     cert_key = request.json.get('certificate_key')
-    if cert_key is None or cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
+    if cert_key is None or \
+       cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
         raise f"Invalid certificate key : {cert_key}"
     validity = _save_personnal_certificate(user, certificate, cert_key)
 

@@ -10,7 +10,7 @@ def test_upload_cert_form(app: Any, client: Any):
     certificate = sign_certificate(app.ca, 1)
     data = {'certificate': (
         io.BytesIO(bytes(certificate, encoding='UTF-8')), 'certificate.pem'
-        ),
+    ),
         'certificate_key': 'cta',
     }
 
@@ -21,7 +21,8 @@ def test_upload_cert_form(app: Any, client: Any):
         content_type="multipart/form-data",
     )
 
-    r = client.get(url_for('get_certificate'), data={'certificate_key':'cta'})
+    r = client.get(url_for('get_certificate'),
+                   data={'certificate_key': 'cta'})
     assert r.status_code == 200 and \
         r.json['certificate'] == certificate and \
         r.json['cabundle'] == open(app.config['CTACS_CABUNDLE'], 'r').read()
@@ -55,7 +56,7 @@ def test_expired_owncert_config(app: Any, client: Any):
     r = client.post(url_for('upload_certificate'), json={
                     'certificate': certificate,
                     'certificate_key': 'cta',
-        })
+                    })
     assert r.status_code == 400 and \
         r.text == 'no valid certificate provided'
 
@@ -106,7 +107,8 @@ def test_get_cert_config(app: Any, client: Any):
             'certificate_key': 'cta',
         }
     )
-    r = client.get(url_for('get_certificate'), data={'certificate_key':'cta'})
+    r = client.get(url_for('get_certificate'),
+                   data={'certificate_key': 'cta'})
     assert r.status_code == 200 and \
         r.json['certificate'] == certificate and \
         r.json['cabundle'] == open(app.config['CTACS_CABUNDLE'], 'r').read()
@@ -114,7 +116,8 @@ def test_get_cert_config(app: Any, client: Any):
 
 @pytest.mark.timeout(30)
 def test_get_cert_main_config(app: Any, client: Any):
-    r = client.get(url_for('get_certificate'), data={'certificate_key':'cta'})
+    r = client.get(url_for('get_certificate'),
+                   data={'certificate_key': 'cta'})
     assert r.status_code == 200 and \
         r.json['certificate'] == \
         open(app.config['CTACS_CLIENTCERT'], 'r').read() and \
