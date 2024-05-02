@@ -339,6 +339,7 @@ def _get_certificates_status(username):
         )
 
         status[cert_key] = _get_certificate_file_status(cert_file)
+    return status
 
 
 @app.route(url_prefix + '/')
