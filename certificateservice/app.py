@@ -304,6 +304,8 @@ def _get_certificate_file_status(cert_file):
 
     if not os.path.isfile(cert_file):
         return status
+    else:
+        status['exist'] = True
 
     try:
         with open(cert_file, 'r') as f:
