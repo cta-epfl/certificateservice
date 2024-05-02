@@ -57,7 +57,7 @@
 
           <h3>Your certificates</h3>
           <table class="table table-striped">
-            {% for cert_key, status in certificates_status -%}
+            {% for cert_key, status in certificates_status.items() if not cert_key == 'shared' -%}
             <tr>
               <td>{{ cert_key }}</td>
               <td>
