@@ -293,38 +293,69 @@ def shared_certificate_status():
         return 'Unhealthy! - Shared certificate is outdated', 500
 
 
+def _get_certificate_file_status(cert_file):
+    status = {
+        "allowed_acces": True,
+        "exist": False,
+        "validity": None,
+        "outdated": None,
+        "error_message": None,
+    }
+
+    if not os.path.isfile(cert_file):
+        return status
+
+    try:
+        with open(cert_file, 'r') as f:
+            certificate = f.read()
+            status["validity"] = certificate_validity(certificate)
+            status["outdated"] = status["validity"] <= datetime.now()
+    except CertificateError as e:
+        status["error_message"] = e.message
+
+    return status
+
+
+def _get_certificates_status(username):
+    allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
+
+    status = {}
+    if username not in allowed_users:
+        status['shared'] = {
+            "allowed_access": False,
+            "exist": False,
+            "validity": None,
+            "outdated": None,
+            "error_message": None,
+        }
+    else:
+        shared_cert_file = app.config['CTACS_CLIENTCERT']
+        status['shared'] = _get_certificate_file_status(shared_cert_file)
+
+    for cert_key in app.config['CTACS_ALLOWED_CERT_KEYS']:
+        filename = user_to_path_fragment(username) + "__" + cert_key + ".crt"
+        cert_file = os.path.join(
+            app.config['CTACS_CERTIFICATE_DIR'], filename
+        )
+
+        status[cert_key] = _get_certificate_file_status(cert_file)
+
+
 @app.route(url_prefix + '/')
 @upload_authenticated
 def home(user):
-    uploaded = request.args.get('uploaded', False) is not False
-    error_message = request.args.get('error_message', None)
-
-    up_to_date = False
-    validity = None
-    outdated = False
     username = user
     if isinstance(user, dict):
         username = user['name']
 
-    # TODO: display all certificates available
-    cert_key = app.config['CTACS_ALLOWED_CERT_KEYS'][0]
-    if cert_key is None or \
-       cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
-        raise f"Invalid certificate key : {cert_key}"
-    certificate_file, own_certificate = _get_user_certificate(user, cert_key)
-    if certificate_file:
-        try:
-            with open(certificate_file, 'r') as f:
-                certificate = f.read()
-                validity = certificate_validity(certificate)
-                outdated = validity <= datetime.now()
-                up_to_date = not outdated
-        except CertificateError as e:
-            error_message = e.message
+    uploaded = request.args.get('uploaded', False) is not False
+    error_message = request.args.get('error_message', None)
+
+    certificates_status = _get_certificates_status(username)
 
     return render_template(
-        'index.html', user=username, up_to_date=up_to_date, uploaded=uploaded,
-        outdated=outdated, validity=validity, own_certificate=own_certificate,
+        'index.html', user=username, uploaded=uploaded,
+        certificates_status=certificates_status,
         error_message=error_message)
 
 
