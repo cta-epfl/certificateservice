@@ -99,6 +99,9 @@ def create_app():
     app.config['CTACS_MAIN_CERT_ALLOWED_USER'] = os.environ.get(
         'CTACS_MAIN_CERT_ALLOWED_USER', ''
     )
+    app.config['CTACS_ALLOWED_CERT_KEYS'] = os.environ.get(
+        'CTACS_ALLOWED_CERT_KEYS', 'cta,lst'
+    ).split(',')
 
     # Check certificate folder
     os.makedirs(app.config['CTACS_CERTIFICATE_DIR'], exist_ok=True)
@@ -290,33 +293,72 @@ def shared_certificate_status():
         return 'Unhealthy! - Shared certificate is outdated', 500
 
 
+def _get_certificate_file_status(cert_file):
+    status = {
+        "allowed_acces": True,
+        "exist": False,
+        "validity": None,
+        "outdated": None,
+        "error_message": None,
+    }
+
+    if not os.path.isfile(cert_file):
+        return status
+    else:
+        status['exist'] = True
+
+    try:
+        with open(cert_file, 'r') as f:
+            certificate = f.read()
+            status["validity"] = certificate_validity(certificate)
+            status["outdated"] = status["validity"] <= datetime.now()
+    except CertificateError as e:
+        status["error_message"] = e.message
+
+    return status
+
+
+def _get_certificates_status(username):
+    allowed_users = app.config['CTACS_MAIN_CERT_ALLOWED_USER'].split(',')
+
+    status = {}
+    if username not in allowed_users:
+        status['shared'] = {
+            "allowed_access": False,
+            "exist": False,
+            "validity": None,
+            "outdated": None,
+            "error_message": None,
+        }
+    else:
+        shared_cert_file = app.config['CTACS_CLIENTCERT']
+        status['shared'] = _get_certificate_file_status(shared_cert_file)
+
+    for cert_key in app.config['CTACS_ALLOWED_CERT_KEYS']:
+        filename = user_to_path_fragment(username) + "__" + cert_key + ".crt"
+        cert_file = os.path.join(
+            app.config['CTACS_CERTIFICATE_DIR'], filename
+        )
+
+        status[cert_key] = _get_certificate_file_status(cert_file)
+    return status
+
+
 @app.route(url_prefix + '/')
 @upload_authenticated
 def home(user):
-    uploaded = request.args.get('uploaded', False) is not False
-    error_message = request.args.get('error_message', None)
-
-    up_to_date = False
-    validity = None
-    outdated = False
     username = user
     if isinstance(user, dict):
         username = user['name']
 
-    certificate_file, own_certificate = _get_user_certificate(user)
-    if certificate_file:
-        try:
-            with open(certificate_file, 'r') as f:
-                certificate = f.read()
-                validity = certificate_validity(certificate)
-                outdated = validity <= datetime.now()
-                up_to_date = not outdated
-        except CertificateError as e:
-            error_message = e.message
+    uploaded = request.args.get('uploaded', False) is not False
+    error_message = request.args.get('error_message', None)
+
+    certificates_status = _get_certificates_status(username)
 
     return render_template(
-        'index.html', user=username, up_to_date=up_to_date, uploaded=uploaded,
-        outdated=outdated, validity=validity, own_certificate=own_certificate,
+        'index.html', user=username, uploaded=uploaded,
+        certificates_status=certificates_status,
         error_message=error_message)
 
 
@@ -330,7 +372,9 @@ def user_to_path_fragment(user):
 @app.route(url_prefix + '/certificate', methods=['GET'])
 @download_authenticated
 def get_certificate(user):
-    certificate_file, own_certificate = _get_user_certificate(user)
+    cert_key = request.args.get('certificate_key', request.form.get(
+        'certificate_key'))
+    certificate_file, own_certificate = _get_user_certificate(user, cert_key)
     if certificate_file is None and own_certificate is True:
         raise CertificateError('You do not have any certificate configured')
 
@@ -355,11 +399,11 @@ def get_certificate(user):
         raise CertificateError('no valid certificate configured')
 
 
-def _get_user_certificate(user):
+def _get_user_certificate(user, cert_key):
     certificate_file = app.config['CTACS_CLIENTCERT']
     own_certificate = False
 
-    filename = user_to_path_fragment(user) + ".crt"
+    filename = user_to_path_fragment(user) + "__" + cert_key + ".crt"
     own_certificate_file = os.path.join(
         app.config['CTACS_CERTIFICATE_DIR'], filename
     )
@@ -389,6 +433,10 @@ def personnal_certificate_form(user):
             url_for('home', error_message='Missing the certificate file'))
 
     file = request.files['certificate']
+    cert_key = request.form.get('certificate_key')
+    if cert_key is None or \
+       cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
+        raise f"Invalid certificate key : {cert_key}"
 
     try:
         if file.filename == '':
@@ -398,7 +446,7 @@ def personnal_certificate_form(user):
                     error_message='Missing certificate file'))
         if file:
             certificate = file.read().decode('utf-8')
-            _save_personnal_certificate(user, certificate)
+            _save_personnal_certificate(user, certificate, cert_key)
     except CertificateError as e:
         return redirect(url_for('home', error_message=e.message))
     except FileNotFoundError as e:
@@ -410,13 +458,17 @@ def personnal_certificate_form(user):
 @upload_authenticated
 def upload_certificate(user):
     certificate = request.json.get('certificate')
-    validity = _save_personnal_certificate(user, certificate)
+    cert_key = request.json.get('certificate_key')
+    if cert_key is None or \
+       cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
+        raise f"Invalid certificate key : {cert_key}"
+    validity = _save_personnal_certificate(user, certificate, cert_key)
 
     return {'message': 'Certificate stored', 'validity': validity}, 200
 
 
-def _save_personnal_certificate(user, certificate):
-    filename = user_to_path_fragment(user) + ".crt"
+def _save_personnal_certificate(user, certificate, cert_key):
+    filename = user_to_path_fragment(user) + "__" + cert_key + ".crt"
     certificate_file = os.path.join(
         app.config['CTACS_CERTIFICATE_DIR'], filename
     )

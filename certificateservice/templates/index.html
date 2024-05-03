@@ -38,32 +38,46 @@
           <h2 class="card-title">Certificate status</h5>
         </div>
         <div class="card-body">
-          {% if not own_certificate %}
-          {% if outdated %}
-          <div class="alert alert-warning" role="alert">
-            The shared certificate is expired, please contact CTAO CD Admin team to reupload a new one, or upload your own.
-          </div>
-          {% else %}
-          <div class="alert alert-success" role="alert">
-            The shared certificate is up to date ! The expiring validity is {{ validity }}.
-          </div>
+          {% if certificates_status['shared']['allowed_access'] %}
+          <h3>Shared certificate</h3>
+            {% if not certificates_status['shared']['exist'] %}
+            <div class="alert alert-warning" role="alert">
+              The shared certificate is missing, please contact CTAO CD Admin team to upload one, or upload your own.
+            </div>
+            {% elif certificates_status['shared']['outdated'] %}
+            <div class="alert alert-warning" role="alert">
+              The shared certificate is expired, please contact CTAO CD Admin team to reupload a new one, or upload your own.
+            </div>
+            {% else %}
+            <div class="alert alert-success" role="alert">
+              The shared certificate is up to date ! The expiring validity is {{ certificates_status['shared']['validity'] }}.
+            </div>
+            {% endif %}
           {% endif %}
-          {% else %}
-          {% if outdated %}
-          <div class="alert alert-warning" role="alert">
-            Your certificate is outdated since {{ validity }}, please reupload it to continue using JupyterHub and
-            DownloadService !
-          </div>
-          {% elif up_to_date %}
-          <div class="alert alert-success" role="alert">
-            Your certificate is up to date ! The expiring validity is {{ validity }}.
-          </div>
-          {% else %}
-          <div class="alert alert-primary" role="alert">
-            You have never uploaded any certificate, please do so to use this service!
-          </div>
-          {% endif %}
-          {% endif %}
+
+          <h3>Your certificates</h3>
+          <table class="table table-striped">
+            {% for cert_key, status in certificates_status.items() if not cert_key == 'shared' -%}
+            <tr>
+              <td>{{ cert_key }}</td>
+              <td>
+                {% if not status['exist'] %}
+                <div class="alert alert-warning" role="alert">
+                  You have never uploaded your certificate, please upload it !
+                </div>
+                {% elif status['outdated'] %}
+                <div class="alert alert-warning" role="alert">
+                  Your certificate is outdated since {{ status['validity'] }}, please reupload it !
+                </div>
+                {% else %}
+                <div class="alert alert-success" role="alert">
+                  Your certificate is up to date ! The expiring validity is {{ status['validity'] }}.
+                </div>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
         </div>
       </div>
       <div class="card">
@@ -86,6 +100,14 @@
             <div class="mb-3">
               <label for="formFile" class="form-label">Your personnal certificate</label>
               <input required class="form-control" type="file" name="certificate" id="formFile">
+            </div>
+            <div class="mb-3">
+              <label for="certKey" class="form-label">Certificate key</label>
+              <select class="form-select" name="certificate_key" id="certKey" aria-label="Default select example">
+                <option value="arc" selected>ARC</option>
+                <option value="cta">CTA</option>
+                <option value="lst">LST</option>
+              </select>
             </div>
             <div class="col-auto">
               <button type="submit" class="btn btn-primary mb-3">Upload</button>
