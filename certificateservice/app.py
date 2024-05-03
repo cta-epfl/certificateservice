@@ -462,6 +462,18 @@ def upload_certificate(user):
     if cert_key is None or \
        cert_key not in app.config['CTACS_ALLOWED_CERT_KEYS']:
         raise f"Invalid certificate key : {cert_key}"
+
+    provided_user = request.json.get('user', None)
+    if provided_user is not None and not isinstance(
+            user, dict) and user.get('admin') != True:
+        raise "Insuficient permissions to upload certificates for other users"
+
+    provided_user = request.json.get('user', None)
+    if provided_user is not None and not isinstance(provided_user, str):
+        raise "Invalid user argument, only strings are accepted"
+    if provided_user is not None:
+        user = provided_user
+
     validity = _save_personnal_certificate(user, certificate, cert_key)
 
     return {'message': 'Certificate stored', 'validity': validity}, 200
