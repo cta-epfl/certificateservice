@@ -34,4 +34,4 @@ line-length = 78
 skip-string-normalization = true
 
 [tool.poetry.scripts]
-certificateservice = { callable = "certificateservice.cli:main" }
+certificateservice = "certificateservice.cli:main"
